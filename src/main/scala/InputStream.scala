@@ -1,17 +1,19 @@
+import java.io.FileReader
 
-class InputStream(fileAddress: String) extends java.io.InputStream{
+import scala.collection.mutable.ListBuffer
+import scala.util.{Failure, Success, Try}
 
-  //A stream is a conceptually endless flow of data
-  //A stream is connected to a data source or a data destination
-  //Streams in Java IO can be either byte based (reading and writing bytes)
-  // or character based (reading and writing characters)
+class InputStream(fileAddress: String){
+
+  var stream: ListBuffer[String] = new ListBuffer[String]()
 
   def open = {
-
+    new FileReader(fileAddress)
   }
 
   def readln = {
-
+    val fileReader = open
+    fileReader.read
   }
 
   def seek(pos: Int): Unit ={
@@ -22,5 +24,4 @@ class InputStream(fileAddress: String) extends java.io.InputStream{
 
   }
 
-  override def read(): Int = ???
 }
