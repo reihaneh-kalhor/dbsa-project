@@ -5,15 +5,21 @@ import scala.util.{Failure, Success, Try}
 
 class InputStream(fileAddress: String){
 
-  var stream: ListBuffer[String] = new ListBuffer[String]()
+  var stream: ListBuffer[Int] = new ListBuffer[Int]()
 
   def open = {
     new FileReader(fileAddress)
   }
 
-  def readln = {
+  def readLine: ListBuffer[Int] = {
     val fileReader = open
-    fileReader.read
+    val nextChar = fileReader.read
+    if( nextChar != '\n'){
+      stream += nextChar
+      readLine
+    }
+    else
+      stream
   }
 
   def seek(pos: Int): Unit ={
