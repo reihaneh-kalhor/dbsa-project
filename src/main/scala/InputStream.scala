@@ -1,29 +1,41 @@
-import java.io.FileReader
+import java.io.{File, FileReader}
+import java.io.RandomAccessFile
 
 import scala.collection.mutable.ListBuffer
-import scala.util.{Failure, Success, Try}
 
 class InputStream(fileAddress: String){
 
-  var stream: ListBuffer[Int] = new ListBuffer[Int]()
+  var stream: Array[Char] = Array()
 
   def open = {
     new FileReader(fileAddress)
   }
 
-  def readLine: ListBuffer[Int] = {
-    val fileReader = open
-    val nextChar = fileReader.read
-    if( nextChar != '\n'){
-      stream += nextChar
-      readLine
+  def readLine(fileReader: FileReader): Array[Char] = {
+    val nextChar = fileReader.read.toChar
+    if( nextChar != '\r'){
+      stream = stream :+ nextChar
+      readLine(fileReader)
     }
     else
       stream
   }
 
-  def seek(pos: Int): Unit ={
+  def seek(fileReader: FileReader, pos: Int)  ={
 
+    def readLine(randomAccessFile: RandomAccessFile): Array[Char] = {
+      val nextChar = randomAccessFile.readByte.toChar
+      if( nextChar != '\r'){
+        stream = stream :+ nextChar
+        readLine(randomAccessFile)
+      }
+      else
+        stream
+    }
+
+      val raf = new RandomAccessFile(fileAddress, "r")
+      raf.seek(pos)
+      readLine(raf)
   }
 
   def endOfStream = {
