@@ -50,4 +50,6 @@ class OutputStream(fileAddress: String) {
       bufferedWriter.close
   }
 
+  def writeLineByBuffer(str: String, bufferSize: Int) = ???
+
 }

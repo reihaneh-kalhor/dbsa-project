@@ -1,4 +1,5 @@
 import java.io.{BufferedReader, File, FileInputStream, FileReader, RandomAccessFile}
+import java.util.Scanner
 
 import scala.collection.mutable.ListBuffer
 
@@ -31,14 +32,13 @@ class InputStream(fileAddress: String){
       throw new Exception("Stream has not been opened ...")
     }
 
-    val nextChar = fileReader.read.toChar
-    if( nextChar != '\r'){
+    resetStringBuffer
+    var nextChar = fileReader.read.toChar
+    while(nextChar != '\r') {
       stringBuffer.append(nextChar)
-      readLine
+      nextChar = fileReader.read.toChar
     }
-    else
-      stringBuffer.append(System.lineSeparator)
-      stringBuffer
+    stringBuffer
   }
 
   def readLineByBuffer: StringBuffer = {
@@ -47,9 +47,9 @@ class InputStream(fileAddress: String){
       throw new Exception("Stream has not been opened ...")
     }
 
-    bufferedReader = new BufferedReader(fileReader)
+    resetStringBuffer
     val line = bufferedReader.readLine()
-    stringBuffer.append(line).append(System.lineSeparator())
+    stringBuffer.append(line)
     stringBuffer
   }
 
@@ -70,13 +70,21 @@ class InputStream(fileAddress: String){
   }
 
   def endOfStream: Boolean = {
-    if(bufferedReader == null){
+    //has issue I should think about it
+    if(fileReader == null){
       throw new Exception("Stream has not been opened ...")
     }
+    if(bufferedReader.readLine == null){
+      bufferedReader.close
+      return true
+    }
+    false
 
-    bufferedReader.readLine() == null
   }
 
   override def toString: String = stringBuffer.toString
+
+
+  def readLineByBuffer(bufferSize: Int) = ???
 
 }
