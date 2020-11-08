@@ -11,6 +11,11 @@ class InputStream(fileAddress: String){
   var stringBuffer: StringBuffer = null //to show output
 
   def open = {
+
+    if(!new File(fileAddress).exists){
+      throw new Exception("File does not exist ...")
+    }
+
     fileReader = new FileReader(fileAddress)
     bufferedReader =  new BufferedReader(fileReader)
     stringBuffer = new StringBuffer
@@ -21,17 +26,27 @@ class InputStream(fileAddress: String){
   }
 
   def readLine: StringBuffer = {
+
+    if(fileReader == null){
+      throw new Exception("Stream has not been opened ...")
+    }
+
     val nextChar = fileReader.read.toChar
     if( nextChar != '\r'){
       stringBuffer.append(nextChar)
       readLine
     }
     else
-      stringBuffer.append(System.lineSeparator())
+      stringBuffer.append(System.lineSeparator)
       stringBuffer
   }
 
   def readLineByBuffer: StringBuffer = {
+
+    if(fileReader == null){
+      throw new Exception("Stream has not been opened ...")
+    }
+
     bufferedReader = new BufferedReader(fileReader)
     val line = bufferedReader.readLine()
     stringBuffer.append(line).append(System.lineSeparator())
@@ -39,6 +54,11 @@ class InputStream(fileAddress: String){
   }
 
   def seek(pos: Int): StringBuffer = {
+
+    if(!new File(fileAddress).exists){
+      throw new Exception("File does not exist ...")
+    }
+
     randomAccessFile = new RandomAccessFile(fileAddress, "r")
     randomAccessFile.seek(pos)
     fileReader = new FileReader(randomAccessFile.getFD)
@@ -50,6 +70,10 @@ class InputStream(fileAddress: String){
   }
 
   def endOfStream: Boolean = {
+    if(bufferedReader == null){
+      throw new Exception("Stream has not been opened ...")
+    }
+
     bufferedReader.readLine() == null
   }
 
