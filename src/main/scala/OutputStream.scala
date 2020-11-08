@@ -1,4 +1,8 @@
 class OutputStream {
-  
+  def create = ???
+
+  def writeln = ???
+
+  def close = ???
 
 }
