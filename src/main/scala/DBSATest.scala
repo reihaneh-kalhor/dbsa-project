@@ -1,12 +1,16 @@
 object DBSATest extends App {
 
   var inputStream = new InputStream(".\\sampleFile.csv")
-  var fileReader = inputStream.open
-//  val line = inputStream.readLine(fileReader).mkString("")
-//  println(line)
+  inputStream.open
+  inputStream.readLine
+  println(inputStream.endOfStream)
+  inputStream.seek(5)
+  inputStream.seek(13)
+  println(inputStream.toString)
+  println(inputStream.endOfStream)
 
-  val seekP = inputStream.seek(fileReader, 5)
-  println(seekP.mkString(""))
+
+
 
 
 
