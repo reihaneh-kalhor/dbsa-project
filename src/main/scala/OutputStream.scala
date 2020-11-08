@@ -13,25 +13,40 @@ class OutputStream(fileAddress: String) {
   }
 
   def writeLine(str: String) = {
+
+    if(fileWriter == null) {
+      throw new Exception("Stream has not been created ...")
+    }
+
     fileWriter.write(str)
     fileWriter.write(System.lineSeparator)
   }
 
   def writeLineByBuffer(str: String) = {
+
+    if(fileWriter == null) {
+      throw new Exception("Stream has not been created ...")
+    }
+
     bufferedWriter = new BufferedWriter(fileWriter);
     bufferedWriter.write(str)
     bufferedWriter.write(System.lineSeparator)
     bufferedWriter.flush
-
   }
 
   def close = {
-    if(fileWriter != null)
+
+    if(fileWriter == null) {
+      throw new Exception("Stream has not been created ...")
+    }
       fileWriter.close()
   }
 
   def bufferClose = {
-    if(bufferedWriter != null)
+
+    if(bufferedWriter == null) {
+      throw new Exception("Buffer stream has not been created ...")
+    }
       bufferedWriter.close
   }
 
