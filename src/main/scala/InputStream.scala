@@ -1,7 +1,4 @@
 import java.io.{BufferedReader, File, FileInputStream, FileReader, RandomAccessFile}
-import java.util.Scanner
-
-import scala.collection.mutable.ListBuffer
 
 class InputStream(fileAddress: String){
 
@@ -17,16 +14,15 @@ class InputStream(fileAddress: String){
   def open = {
 
     cursorPosition = 0
+    file = new File(fileAddress)
 
-    if(!new File(fileAddress).exists){
+    if(!file.exists){
       throw new Exception("File does not exist ...")
     }
 
     fileReader = new FileReader(fileAddress)
     bufferedReader =  new BufferedReader(fileReader)
     stringBuffer = new StringBuffer
-
-    file = new File(fileAddress)
   }
 
   def resetStringBuffer ={
@@ -56,13 +52,13 @@ class InputStream(fileAddress: String){
     }
 
     resetStringBuffer
-    val line = bufferedReader.readLine()
-    cursorPosition += line.getBytes.length
+    val line: String = bufferedReader.readLine.toString
+    cursorPosition += line.length
     stringBuffer.append(line)
     stringBuffer
   }
 
-  def seek(pos: Int): StringBuffer = {
+  def seek(pos: Int): StringBuffer  = {
 
     if(!new File(fileAddress).exists){
       throw new Exception("File does not exist ...")
@@ -73,7 +69,7 @@ class InputStream(fileAddress: String){
     fileReader = new FileReader(randomAccessFile.getFD)
     bufferedReader =  new BufferedReader(fileReader);
     val line = bufferedReader.readLine
-    cursorPosition += line.getBytes.length
+    cursorPosition += line.length
     stringBuffer.append(line)
     if(!endOfStream) stringBuffer.append(System.lineSeparator())
     stringBuffer
