@@ -10,8 +10,13 @@ class InputStream(fileAddress: String){
   var randomAccessFile: RandomAccessFile = null //used in seek function
   var bufferedReader: BufferedReader = null //used in second readLine
   var stringBuffer: StringBuffer = null //to show output
+  var file: File = null
+
+  var cursorPosition: Long = 0
 
   def open = {
+
+    cursorPosition = 0
 
     if(!new File(fileAddress).exists){
       throw new Exception("File does not exist ...")
@@ -20,6 +25,8 @@ class InputStream(fileAddress: String){
     fileReader = new FileReader(fileAddress)
     bufferedReader =  new BufferedReader(fileReader)
     stringBuffer = new StringBuffer
+
+    file = new File(fileAddress)
   }
 
   def resetStringBuffer ={
@@ -37,6 +44,7 @@ class InputStream(fileAddress: String){
     while(nextChar != '\r') {
       stringBuffer.append(nextChar)
       nextChar = fileReader.read.toChar
+      cursorPosition += cursorPosition
     }
     stringBuffer
   }
@@ -49,6 +57,7 @@ class InputStream(fileAddress: String){
 
     resetStringBuffer
     val line = bufferedReader.readLine()
+    cursorPosition += line.getBytes.length
     stringBuffer.append(line)
     stringBuffer
   }
@@ -64,22 +73,14 @@ class InputStream(fileAddress: String){
     fileReader = new FileReader(randomAccessFile.getFD)
     bufferedReader =  new BufferedReader(fileReader);
     val line = bufferedReader.readLine
+    cursorPosition += line.getBytes.length
     stringBuffer.append(line)
     if(!endOfStream) stringBuffer.append(System.lineSeparator())
     stringBuffer
   }
 
   def endOfStream: Boolean = {
-    //has issue I should think about it
-    if(fileReader == null){
-      throw new Exception("Stream has not been opened ...")
-    }
-    if(bufferedReader.readLine == null){
-      bufferedReader.close
-      return true
-    }
-    false
-
+    cursorPosition >= file.length()
   }
 
   override def toString: String = stringBuffer.toString
