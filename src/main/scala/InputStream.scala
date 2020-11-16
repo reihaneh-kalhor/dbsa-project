@@ -1,20 +1,27 @@
-import java.io.{BufferedReader, File, FileInputStream, FileReader, RandomAccessFile}
+import java.io.{BufferedReader, File, FileReader, RandomAccessFile}
 
 class InputStream(fileAddress: String){
 
   var fileReader: FileReader = null //main stream
-
-  var randomAccessFile: RandomAccessFile = null //used in seek function
   var bufferedReader: BufferedReader = null //used in second readLine
-  var stringBuffer: StringBuffer = null //to show output
-  var file: File = null
 
-  var cursorPosition: Long = 0
+  private var randomAccessFile: RandomAccessFile = null //used in seek function
+  private var stringBuffer: StringBuffer = null //to show output
+  private var file: File = null
+
+  private var currentChar : Char = " ".charAt(0)
+  private var nextChar : Char = " ".charAt(0)
+  private var nextInt = 0
+
+  private var nextLine = ""
+  private var currentLine = ""
+
 
   def open = {
 
-    cursorPosition = 0
     file = new File(fileAddress)
+    currentChar = " ".charAt(0)
+    nextChar = " ".charAt(0)
 
     if(!file.exists){
       throw new Exception("File does not exist ...")
@@ -36,13 +43,39 @@ class InputStream(fileAddress: String){
     }
 
     resetStringBuffer
-    var nextChar = fileReader.read.toChar
-    while(nextChar != '\r') {
-      stringBuffer.append(nextChar)
-      nextChar = fileReader.read.toChar
-      cursorPosition += cursorPosition
+    currentChar = nextChar
+    while(currentChar != '\r') {
+      stringBuffer.append(currentChar)
+      currentChar = fileReader.read.toChar
     }
     stringBuffer
+  }
+
+  def endOfStream(fileReader: FileReader): Boolean = {
+
+    if(fileReader == null){
+      throw new Exception("Stream has not been opened ...")
+    }
+
+    nextInt = fileReader.read
+    if(nextInt == -1){
+      return true
+    }
+    else {
+      nextChar = nextInt.toChar
+      return false
+    }
+  }
+
+  def endOfStream(bufferedReader: BufferedReader): Boolean = {
+
+    if(bufferedReader == null){
+      throw new Exception("Stream has not been opened ...")
+    }
+
+    nextLine = bufferedReader.readLine
+    if(nextLine == null) true
+    else false
   }
 
   def readLineByBuffer: StringBuffer = {
@@ -52,8 +85,9 @@ class InputStream(fileAddress: String){
     }
 
     resetStringBuffer
-    val line: String = bufferedReader.readLine.toString
-    cursorPosition += line.length
+//    val line: String = bufferedReader.readLine.toString
+    val line = nextLine
+    nextLine = ""
     stringBuffer.append(line)
     stringBuffer
   }
@@ -69,18 +103,11 @@ class InputStream(fileAddress: String){
     fileReader = new FileReader(randomAccessFile.getFD)
     bufferedReader =  new BufferedReader(fileReader);
     val line = bufferedReader.readLine
-    cursorPosition += line.length
     stringBuffer.append(line)
-    if(!endOfStream) stringBuffer.append(System.lineSeparator())
     stringBuffer
   }
 
-  def endOfStream: Boolean = {
-    cursorPosition >= file.length()
-  }
-
   override def toString: String = stringBuffer.toString
-
 
   def readLineByBuffer(bufferSize: Int) = ???
 
