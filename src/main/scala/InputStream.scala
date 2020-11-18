@@ -9,31 +9,39 @@ class InputStream(fileAddress: String){
   private var stringBuffer: StringBuffer = null //to show output
   private var file: File = null
 
-  private var currentChar : Char = " ".charAt(0)
   private var nextChar : Char = " ".charAt(0)
   private var nextInt = 0
 
   private var nextLine = ""
-  private var currentLine = ""
 
 
   def open = {
 
     file = new File(fileAddress)
-    currentChar = " ".charAt(0)
     nextChar = " ".charAt(0)
 
     if(!file.exists){
       throw new Exception("File does not exist ...")
     }
 
-    fileReader = new FileReader(fileAddress)
+    fileReader = new FileReader(file)
     bufferedReader =  new BufferedReader(fileReader)
     stringBuffer = new StringBuffer
   }
 
-  def resetStringBuffer ={
+  def close: Unit = {
+    nextChar = " ".charAt(0)
+
+    if(!file.exists){
+      throw new Exception("File does not exist ...")
+    }
+    fileReader.close
+    bufferedReader.close
     stringBuffer = new StringBuffer
+  }
+
+  def resetStringBuffer ={
+    stringBuffer.delete(0, stringBuffer.length)
   }
 
   def readLine: StringBuffer = {
@@ -42,11 +50,10 @@ class InputStream(fileAddress: String){
       throw new Exception("Stream has not been opened ...")
     }
 
-    resetStringBuffer
-    currentChar = nextChar
-    while(currentChar != '\r') {
-      stringBuffer.append(currentChar)
-      currentChar = fileReader.read.toChar
+    while(nextInt != 10) {
+      nextChar = nextInt.toChar
+      stringBuffer.append(nextChar)
+      nextInt = fileReader.read
     }
     stringBuffer
   }
@@ -59,11 +66,10 @@ class InputStream(fileAddress: String){
 
     nextInt = fileReader.read
     if(nextInt == -1){
-      return true
+      true
     }
     else {
-      nextChar = nextInt.toChar
-      return false
+      false
     }
   }
 
@@ -85,10 +91,8 @@ class InputStream(fileAddress: String){
     }
 
     resetStringBuffer
-//    val line: String = bufferedReader.readLine.toString
-    val line = nextLine
+    stringBuffer.append(nextLine)
     nextLine = ""
-    stringBuffer.append(line)
     stringBuffer
   }
 
@@ -108,7 +112,5 @@ class InputStream(fileAddress: String){
   }
 
   override def toString: String = stringBuffer.toString
-
-  def readLineByBuffer(bufferSize: Int) = ???
 
 }
