@@ -1,4 +1,5 @@
-//merge sort sample
+package Sorting
+
 object MergeSort {
   def merge_Sort(numArray: Array[Int]) {
     //return if array is empty
