@@ -1,8 +1,10 @@
 package Streams
 
-import java.io.{BufferedWriter, File, FileWriter, RandomAccessFile}
-import java.nio.CharBuffer
+import java.io.{BufferedWriter, File, FileOutputStream, FileWriter, RandomAccessFile}
+import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.channels.FileChannel
+import java.nio.charset.Charset
+
 
 //1.2 Writing
 class OutputStream(file: File) {
@@ -11,16 +13,33 @@ class OutputStream(file: File) {
   private var bufferedWriter: BufferedWriter = null // Used for writing line.
   private var randomAccessFile: RandomAccessFile = null // Used for seeking a position in file.
 
-  private var stringBuffer: StringBuffer = null // To show output.
+  private var fileOutputStream: FileOutputStream = null
+  private var fileChannel: FileChannel = null
+  private var currentPosition: Int = 0
+  private var channelSize: Long = 0
 
-  var isBufferEmpty = false //for detecting the full buffer
+  var allFileWritten: Boolean = false
 
   // Open file for writing.
   def create: Unit = {
     try {
+      //used in 1.1.1
       fileWriter = new FileWriter(file)
+
+      //used in 1.1.2 and 1.1.3
       bufferedWriter = new BufferedWriter(fileWriter)
+
+      //used in seek and 1.1.4
       randomAccessFile = new RandomAccessFile(file, "rw")
+
+      //used in 1.1.4
+      fileOutputStream = new FileOutputStream(file)
+      fileChannel = randomAccessFile.getChannel
+      channelSize = fileChannel.size
+      currentPosition = 0
+
+      allFileWritten = false
+
     } catch {
       case _ => throw new Exception("Exception in creating file ...")
     }
@@ -28,7 +47,7 @@ class OutputStream(file: File) {
 
   // Implementation 1.1.1
   // Write one character to file.
-  def writeCharacter(line: StringBuffer): Unit = {
+  def writeCharacter(line: String): Unit = {
     try {
       var i = 0
       while (i < line.length()) {
@@ -36,6 +55,7 @@ class OutputStream(file: File) {
         i += 1
       }
       fileWriter.write(System.lineSeparator)
+      fileWriter.flush
     } catch {
       case _ => throw new Exception("Stream has not been created ...")
     }
@@ -44,7 +64,7 @@ class OutputStream(file: File) {
   // Implementation 1.1.2
   // Write one line to file.
   def writeLine(line: String): Unit = {
-    try{
+    try {
       bufferedWriter.write(line)
       bufferedWriter.write(System.lineSeparator)
       bufferedWriter.flush()
@@ -53,31 +73,51 @@ class OutputStream(file: File) {
     }
   }
 
+  //Set buffer size for BufferedReader
+  def setBufferSize(bufferSize: Int): Unit = {
+    try {
+      bufferedWriter = new BufferedWriter(fileWriter, bufferSize)
+    }
+    catch {
+      case _ => throw new Exception("Stream has not been opened ...")
+    }
+  }
+
   // Implementation 1.1.3
   //write B character of line into the stream
-  def writeCharacterIntoBuffer(buffer: CharBuffer, bufferSize : Int, line: String): Unit = {
-    try{
+  def writeCharacterIntoBuffer(line: String): Unit = {
+    try {
       var i = 0
-      while(i < bufferSize && i < line.length()){
-        fileWriter.write(line.charAt(i))
+      while (i < line.length()) {
+        bufferedWriter.write(line.charAt(i))
         i += 1
       }
-    }catch {
+      bufferedWriter.write(System.lineSeparator)
+      bufferedWriter.flush()
+    } catch {
       case _ => throw new Exception("Stream has not been opened ...")
     }
   }
 
   // Implementation 1.1.4
-  def writeInMappedMemory(startPosition : Int = 0 ,bufferSize : Int, string: String): Unit = {
+  def writeInMappedMemory(bufferSize: Int, string: String): Unit = {
     try {
-      val fileChannel: FileChannel = randomAccessFile.getChannel()
-      var writerMemoryMapping = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0 , bufferSize)
-      var i = 0
-      while(writerMemoryMapping.hasRemaining && i < fileChannel.size() && i<bufferSize && i< string.length )
-      {
-        writerMemoryMapping.putInt(string.charAt(i).asInstanceOf[Int])
-        i += 8
+      var newString = string
+      var endIndex = 0
+      if (string.length > bufferSize) {
+        endIndex = bufferSize + currentPosition
+        if ((bufferSize + currentPosition) > string.length) endIndex = string.length
+        newString = string.substring(currentPosition, endIndex)
+        currentPosition = currentPosition + bufferSize
       }
+
+      val mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, currentPosition, bufferSize)
+      val charBuffer: CharBuffer = CharBuffer.wrap(newString)
+      fileChannel.write(Charset.forName("utf-8").encode(charBuffer))
+      mappedByteBuffer.clear
+
+      if (currentPosition >= string.length || bufferSize > string.length)
+        allFileWritten = true
     } catch {
       case _ => throw new Exception("Stream has not been opened ...")
     }
@@ -86,7 +126,7 @@ class OutputStream(file: File) {
 
   def close: Unit = {
     try {
-      fileWriter.close()
+      fileWriter.close
       bufferedWriter.close
     } catch {
       case _ => throw new Exception("Stream has not been created ...")

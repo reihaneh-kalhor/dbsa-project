@@ -145,14 +145,14 @@ class InputStream(file: File) {
       endOfStream = true
     }
 
-    val memoryMapReader = fileChannel.map(FileChannel.MapMode.READ_ONLY, currentPosition, size)
+    val mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, currentPosition, size)
 
     var byteArray: Array[Byte] = new Array[Byte](size)
 
-    memoryMapReader.get(byteArray, 0, size)
+    mappedByteBuffer.get(byteArray, 0, size)
     val text = (byteArray.map(_.toChar)).mkString
     stringBuffer.append(text)
-    memoryMapReader.clear()
+    mappedByteBuffer.clear()
     currentPosition = currentPosition + size
     stringBuffer
   }
