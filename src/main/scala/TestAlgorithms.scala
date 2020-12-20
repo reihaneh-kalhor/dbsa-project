@@ -3,15 +3,17 @@ import Streams.{InputStream, OutputStream}
 import java.io.File
 
 object TestAlgorithms extends App{
-//  val writerStream = new OutputStream(new File("src/main/resources/sample1.txt"))
-//  writerStream.create()
-//  writerStream.writeToMappedMemory(0,10000,"hello world")
 
-
-
-  val readerStream = new InputStream(new File("src/main/resources/sample.txt"))
+  val readerStream = new InputStream(new File("src/main/resources/aka_name.csv"))
   readerStream.open
-  val a: StringBuffer =  readerStream.readFromMappedMemory(0,6)
-  print(a)
+  var line : StringBuffer = new StringBuffer()
+//  readerStream.setBufferSize(1024)
+
+  while(!readerStream.endOfStream){
+    line = readerStream.readFromMappedMemory(170)
+    println(line)
+  }
+
+
 
 }

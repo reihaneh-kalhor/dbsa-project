@@ -1,33 +1,49 @@
 package Streams
 
-import java.io.{BufferedReader, File, FileReader, IOException, RandomAccessFile}
+import java.io.{BufferedInputStream, BufferedReader, File, FileInputStream, FileNotFoundException, FileReader, IOException, RandomAccessFile}
 import java.nio.channels.FileChannel
-import java.io.FileNotFoundException
+import java.nio.{CharBuffer, MappedByteBuffer}
 import java.nio.charset.StandardCharsets
 import scala.util.control.Breaks.break
 
 
 //1.1 Reading
-class InputStream(file: File){
+class InputStream(file: File) {
 
   private var fileReader: FileReader = null // Main reader stream.
-
   private var bufferedReader: BufferedReader = null // Used for reading line.
   private var randomAccessFile: RandomAccessFile = null // Used for seeking a position in file.
+  private var fileInputStream: FileInputStream = null
+  private var fileChannel: FileChannel = null
 
   private var stringBuffer: StringBuffer = null // Shows string output.
 
   var endOfStream = false //for detecting end of stream
-  var isBufferFull = false //for detecting the full buffer
-  var isEndOfMappedMemory = false
+
+  private var currentPosition: Int = 0
+  private var channelSize: Long = 0
 
   // Initializing the fields for stream
   def open: Unit = {
-    try{
+    try {
+      //used in 1.1.1
       fileReader = new FileReader(file)
-      bufferedReader =  new BufferedReader(fileReader)
-      randomAccessFile = new RandomAccessFile(file, "rw")
+
+      //used in 1.1.2 and 1.1.3
+      bufferedReader = new BufferedReader(fileReader)
+
+      //used in seek and 1.1.4
+      randomAccessFile = new RandomAccessFile(file, "r")
+
+      //used in 1.1.4
+      fileInputStream = new FileInputStream(file)
+      fileChannel = randomAccessFile.getChannel
+      channelSize = fileChannel.size
+      currentPosition = 0
+
+      //used for output the read line
       stringBuffer = new StringBuffer
+
     } catch {
       case _ => throw new Exception("Exception ...")
     }
@@ -39,6 +55,11 @@ class InputStream(file: File){
       fileReader.close
       bufferedReader.close
       randomAccessFile.close
+      fileInputStream.close
+      fileChannel.close
+      channelSize = 0
+      currentPosition = 0
+
       resetStringBuffer
     } catch {
       case _ => throw new Exception("Exception ...")
@@ -46,12 +67,12 @@ class InputStream(file: File){
   }
 
   // Implementation 1.1.1
-  // Read one character and add to string buffer till end of line.
+  // Read one character and add to StringBuffer using FileReader
   def readCharacter: StringBuffer = {
     resetStringBuffer
     try {
       var data = fileReader.read //it reads the int of next character
-      while(data != 10 && data != -1) { // 10 for detecting End of line or -1 for detecting end of file.
+      while (data != 10 && data != -1) { // 10 for detecting End of line or -1 for detecting end of file.
         stringBuffer.append(data.asInstanceOf[Char])
         data = fileReader.read
       }
@@ -63,7 +84,7 @@ class InputStream(file: File){
   }
 
   // Implementation 1.1.2
-  // Read one line and add to string buffer.
+  // Read one line and add to StringBuffer using BufferedReader
   def readLine: StringBuffer = {
     resetStringBuffer
     try {
@@ -79,24 +100,29 @@ class InputStream(file: File){
     }
   }
 
+  //Set buffer size for BufferedReader
+  def setBufferSize(bufferSize: Int): Unit = {
+    try {
+      bufferedReader = new BufferedReader(fileReader, bufferSize)
+    }
+    catch {
+      case _ => throw new Exception("Stream has not been opened ...")
+    }
+  }
+
   // Implementation 1.1.3
-  // Read one character and add to buffer.
-  def readCharacterWithBuffer(bufferSize : Int): StringBuffer = {
+  // Read one line and add to StringBuffer using BufferedReader, the BufferedReader is limited by setBufferSize
+  def readCharacterWithBuffer: StringBuffer = {
     resetStringBuffer
     try {
-      var i = 0
-      var data = fileReader.read
-
-      while(data != -1 && i < bufferSize ) { //
-        // End of line or end of file and end
-        // of buffer
+      var data = bufferedReader.read
+      while (data != 10 && data != -1) { // 10 for detecting End of line or -1 for detecting end of file.
         stringBuffer.append(data.asInstanceOf[Char])
-        data = fileReader.read
-        i += 1
+        data = bufferedReader.read
       }
-      if(i == bufferSize) isBufferFull = true
       if (data == -1) endOfStream = true
       stringBuffer
+
     } catch {
       case _ => throw new Exception("Stream has not been opened ...")
     }
@@ -109,26 +135,26 @@ class InputStream(file: File){
   //https://www.ibm.com/support/knowledgecenter/ssw_aix_72/generalprogramming/understanding_mem_mapping.html
   //https://howtodoinjava.com/java/nio/memory-mapped-files-mappedbytebuffer/
   //https://www.javacodegeeks.com/2013/05/power-of-java-memorymapped-file.html
-  def readFromMappedMemory(startPosition : Int = 0, bufferSize : Int): StringBuffer = {
-    try {
-      resetStringBuffer
-      val fileChannel: FileChannel = randomAccessFile.getChannel
-      val memoryMapReader = fileChannel.map(FileChannel.MapMode.READ_WRITE, startPosition , bufferSize)
-      var data = memoryMapReader.get.toChar
+  def readFromMappedMemory(bufferSize: Int): StringBuffer = {
+    resetStringBuffer
 
-      while(memoryMapReader.hasRemaining)
-      {
-        stringBuffer.append(data)
-        data = memoryMapReader.get.toChar
-      }
-      if(!memoryMapReader.hasRemaining) isEndOfMappedMemory = true
-      if (data == -1) endOfStream = true
+    var size = bufferSize
 
-      stringBuffer
-
-    } catch {
-      case _ => throw new Exception("Stream has not been opened ...")
+    if (bufferSize > (channelSize - currentPosition)) {
+      size = (channelSize - currentPosition).asInstanceOf[Int]
+      endOfStream = true
     }
+
+    val memoryMapReader = fileChannel.map(FileChannel.MapMode.READ_ONLY, currentPosition, size)
+
+    var byteArray: Array[Byte] = new Array[Byte](size)
+
+    memoryMapReader.get(byteArray, 0, size)
+    val text = (byteArray.map(_.toChar)).mkString
+    stringBuffer.append(text)
+    memoryMapReader.clear()
+    currentPosition = currentPosition + size
+    stringBuffer
   }
 
   // Seek position in line.
@@ -136,7 +162,7 @@ class InputStream(file: File){
     try {
       randomAccessFile.seek(pos)
       fileReader = new FileReader(randomAccessFile.getFD)
-      bufferedReader =  new BufferedReader(fileReader)
+      bufferedReader = new BufferedReader(fileReader)
     } catch {
       case _ => throw new Exception("File does not exist ...")
     }

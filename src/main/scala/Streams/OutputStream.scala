@@ -1,6 +1,7 @@
 package Streams
 
 import java.io.{BufferedWriter, File, FileWriter, RandomAccessFile}
+import java.nio.CharBuffer
 import java.nio.channels.FileChannel
 
 //1.2 Writing
@@ -12,8 +13,10 @@ class OutputStream(file: File) {
 
   private var stringBuffer: StringBuffer = null // To show output.
 
+  var isBufferEmpty = false //for detecting the full buffer
+
   // Open file for writing.
-  def create(): Unit = {
+  def create: Unit = {
     try {
       fileWriter = new FileWriter(file)
       bufferedWriter = new BufferedWriter(fileWriter)
@@ -52,7 +55,7 @@ class OutputStream(file: File) {
 
   // Implementation 1.1.3
   //write B character of line into the stream
-  def writeCharacterWithBuffer(bufferSize : Int, line: String): Unit = {
+  def writeCharacterIntoBuffer(buffer: CharBuffer, bufferSize : Int, line: String): Unit = {
     try{
       var i = 0
       while(i < bufferSize && i < line.length()){
@@ -65,7 +68,7 @@ class OutputStream(file: File) {
   }
 
   // Implementation 1.1.4
-  def writeToMappedMemory(startPosition : Int = 0 ,bufferSize : Int, string: String): Unit = {
+  def writeInMappedMemory(startPosition : Int = 0 ,bufferSize : Int, string: String): Unit = {
     try {
       val fileChannel: FileChannel = randomAccessFile.getChannel()
       var writerMemoryMapping = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0 , bufferSize)

@@ -15,8 +15,8 @@ object RandomReading {
       var p = Random.between(0, file.length())
       inputStream.seek(p)
 
-      var line = inputStream.readLine()
-      count += line.length()
+      var line = inputStream.readLine
+      count += line.length
     }
     count
   }
