@@ -4,8 +4,9 @@ import Experiment_1_1.SequentialReading
 import Streams.InputStream
 
 import java.io.File
+import Benchmark.Benchmark
 
-case class LengthByReadBufferSizeBM(fileAddress: String, bufferSize: Int) extends Benchmark(fileAddress){
+case class LengthByReadBufferSizeBM(fileAddress: String, bufferSize: Int) extends Benchmark{
 
   override var repeatIndex: Int = 0
 
@@ -13,15 +14,9 @@ case class LengthByReadBufferSizeBM(fileAddress: String, bufferSize: Int) extend
 
   //Run benchmark
   while (repeatIndex < REPEATS) {
-  inputStream.open
-
   startTime = System.nanoTime
-
-  length = SequentialReading.LengthByReadBufferSize(inputStream, bufferSize)
-
+  length = SequentialReading(fileAddress).LengthByReadBufferSize(bufferSize)
   endTime = System.nanoTime
-
-  inputStream.close
 
   val duration = (endTime - startTime) / 100000
   printIntermediateResult("Calculating length of File by \"LengthByReadBufferSize\" Function takes: " +
@@ -31,7 +26,7 @@ case class LengthByReadBufferSizeBM(fileAddress: String, bufferSize: Int) extend
 }
   //Report Result
   averageTime = calculateAvgDuration(durations)
-  printResults(WARMUP, REPEATS, averageTime, length)
+  printResults(WARMUP, REPEATS, averageTime, length, "file")
 }
 
 }

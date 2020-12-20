@@ -22,6 +22,7 @@ class InputStream(file: File) {
 
   private var currentPosition: Int = 0
   private var channelSize: Long = 0
+  private var byteArrayIndex = 0
 
   // Initializing the fields for stream
   def open: Unit = {
@@ -142,21 +143,32 @@ class InputStream(file: File) {
     resetStringBuffer
 
     var size = bufferSize
+    if(channelSize - currentPosition == 0)  {
+      endOfStream = true
+      return new StringBuffer()
+    }
 
     if (bufferSize > (channelSize - currentPosition)) {
       size = (channelSize - currentPosition).asInstanceOf[Int]
-      endOfStream = true
     }
 
     val mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, currentPosition, size)
 
     var byteArray: Array[Byte] = new Array[Byte](size)
 
-    mappedByteBuffer.get(byteArray, 0, size)
+    var data = mappedByteBuffer.get()
+
+    var i: Int = 0
+    while (data != -1 && data != 10 && i < size) {
+      byteArray(i) = data
+      data = mappedByteBuffer.get
+      currentPosition += 1
+      i +=1
+    }
     val text = (byteArray.map(_.toChar)).mkString
     stringBuffer.append(text)
     mappedByteBuffer.clear()
-    currentPosition = currentPosition + size
+    currentPosition += 1
     stringBuffer
   }
 

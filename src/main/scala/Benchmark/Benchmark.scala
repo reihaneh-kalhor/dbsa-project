@@ -1,11 +1,8 @@
-package Experiment_1_1.SequentialReadingBenchmarks
+package Benchmark
 
-import Streams.InputStream
-
-import java.io.File
 import java.util
 
-abstract class Benchmark(fileAddress: String){
+abstract class Benchmark{
 
   val durations = new util.ArrayList[Long]
   var length: Long = 0
@@ -18,8 +15,6 @@ abstract class Benchmark(fileAddress: String){
 
   var averageTime: Long = 0
 
-  val inputStream: InputStream = new InputStream(new File(fileAddress))
-
   def calculateAvgDuration(durations: util.ArrayList[Long]) = {
     var temp: Long = 0
     for (i <- 0 until durations.size) {
@@ -28,10 +23,10 @@ abstract class Benchmark(fileAddress: String){
     temp / durations.size
   }
 
-  def printResults(warmUp: Int, reps: Int, avg: Long, length: Long): Unit = {
+  def printResults(warmUp: Int, reps: Int, avg: Long, length: Long, parameName:String): Unit = {
     System.out.println()
     System.out.println("--------------------------------FINAL RESULTS----------------------------------")
-    System.out.println("Length of File: " + length)
+    System.out.println("Length of " + parameName + ": " + length)
     System.out.println("Total runs: " + reps)
     System.out.println("Warm-up runs: " + warmUp)
     System.out.println("Average \"ReadCharacter\" Duration: " + avg + "ms")
