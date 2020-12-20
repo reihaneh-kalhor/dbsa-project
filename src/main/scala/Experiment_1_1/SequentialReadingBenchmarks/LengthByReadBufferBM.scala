@@ -4,9 +4,11 @@ import Streams.InputStream
 
 import java.io.File
 
-object LengthByReadBufferBM extends Benchmark("src/main/resources/aka_name.csv"){
+case class LengthByReadBufferBM(fileAddress: String) extends Benchmark(fileAddress){
 
-  def main(args: Array[String]): Unit = {
+  override var repeatIndex: Int = 0
+
+  def benchmark: Unit = {
 
     //Run benchmark
     while (repeatIndex < REPEATS) {

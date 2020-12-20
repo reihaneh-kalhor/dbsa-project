@@ -5,9 +5,10 @@ import Streams.InputStream
 
 import java.io.File
 
-object LengthByMappedMemoryBM extends Benchmark("src/main/resources/aka_name.csv"){
+case class LengthByMappedMemoryBM(fileAddress: String, bufferSize: Int) extends Benchmark(fileAddress){
 
-  def main(args: Array[String]): Unit = {
+  override var repeatIndex: Int = 0
+  def benchmark: Unit = {
 
     //Run benchmark
     while (repeatIndex < REPEATS) {
@@ -15,7 +16,7 @@ object LengthByMappedMemoryBM extends Benchmark("src/main/resources/aka_name.csv
 
       startTime = System.nanoTime
 
-      length = SequentialReading.LengthByMappedMemory(inputStream, 1024)
+      length = SequentialReading.LengthByMappedMemory(inputStream, bufferSize)
 
       endTime = System.nanoTime
 
@@ -31,5 +32,6 @@ object LengthByMappedMemoryBM extends Benchmark("src/main/resources/aka_name.csv
     averageTime = calculateAvgDuration(durations)
     printResults(WARMUP, REPEATS, averageTime, length)
   }
+
 
 }

@@ -5,13 +5,13 @@ import Streams.InputStream
 import java.io.File
 import java.util
 
-class Benchmark(fileAddress: String){
+abstract class Benchmark(fileAddress: String){
 
   val durations = new util.ArrayList[Long]
   var length: Long = 0
   var WARMUP = 2
   var REPEATS = 10
-  var repeatIndex = 0
+  var repeatIndex: Int
 
   var startTime: Long = 0
   var endTime: Long = 0
@@ -44,5 +44,7 @@ class Benchmark(fileAddress: String){
     System.out.println(message)
     System.out.println("-------------------------------------------------------------------------------")
   }
+
+  def benchmark: Unit
 
 }

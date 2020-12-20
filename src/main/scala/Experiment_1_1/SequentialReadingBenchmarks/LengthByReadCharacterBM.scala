@@ -6,29 +6,31 @@ import Streams.InputStream
 import java.io.File
 import java.util
 
-object LengthByReadCharacterBM extends Benchmark("src/main/resources/aka_name.csv") {
+case class LengthByReadCharacterBM(fileAddress: String) extends Benchmark(fileAddress) {
 
-  def main(args: Array[String]): Unit = {
+  override var repeatIndex: Int = 0
 
-    //Run benchmark
-    while (repeatIndex < REPEATS) {
-      inputStream.open
+  def benchmark: Unit = {
 
-      startTime = System.nanoTime
+  //Run benchmark
+  while (repeatIndex < REPEATS) {
+  inputStream.open
 
-      length = SequentialReading.LengthByReadCharacter(inputStream)
+  startTime = System.nanoTime
 
-      endTime = System.nanoTime
+  length = SequentialReading.LengthByReadCharacter(inputStream)
 
-      inputStream.close
+  endTime = System.nanoTime
 
-      val duration = (endTime - startTime) / 100000
-      printIntermediateResult("Calculating length of File by \"LengthByReadCharacter\" Function takes: " + duration + "ms")
-      if (repeatIndex >= WARMUP) durations.add(duration)
-      repeatIndex += 1
-    }
-    //Report Result
-    averageTime = calculateAvgDuration(durations)
-    printResults(WARMUP, REPEATS, averageTime, length)
-  }
+  inputStream.close
+
+  val duration = (endTime - startTime) / 100000
+  printIntermediateResult("Calculating length of File by \"LengthByReadCharacter\" Function takes: " + duration + "ms")
+  if (repeatIndex >= WARMUP) durations.add(duration)
+  repeatIndex += 1
+}
+  //Report Result
+  averageTime = calculateAvgDuration(durations)
+  printResults(WARMUP, REPEATS, averageTime, length)
+}
 }
