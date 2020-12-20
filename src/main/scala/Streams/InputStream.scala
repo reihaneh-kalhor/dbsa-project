@@ -26,7 +26,7 @@ class InputStream(file: File) {
   // Initializing the fields for stream
   def open: Unit = {
     try {
-      //used in 1.1.1
+//      used in 1.1.1
       fileReader = new FileReader(file)
 
       //used in 1.1.2 and 1.1.3
@@ -40,6 +40,7 @@ class InputStream(file: File) {
       fileChannel = randomAccessFile.getChannel
       channelSize = fileChannel.size
       currentPosition = 0
+      endOfStream = false
 
       //used for output the read line
       stringBuffer = new StringBuffer
@@ -59,6 +60,8 @@ class InputStream(file: File) {
       fileChannel.close
       channelSize = 0
       currentPosition = 0
+
+      endOfStream = false
 
       resetStringBuffer
     } catch {
