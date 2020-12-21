@@ -4,6 +4,9 @@ import Streams.{InputStream, OutputStream}
 
 import java.io.File
 
+//https://stackoverflow.com/questions/18314852/running-threads-in-round-robin-fashion-in-java
+//http://alvinalexander.com/java/jwarehouse/akka-2.3/akka-actor/src/main/scala/akka/routing/RoundRobin.scala.shtml
+
 class CombinedReadingAndWritingRR(outputFileAddress: String, inputFilesAddressArrays: Array[String]){
   private val outputStream: OutputStream = new OutputStream(new File(outputFileAddress))
   outputStream.create
