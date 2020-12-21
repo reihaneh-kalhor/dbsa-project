@@ -95,6 +95,7 @@ class InputStream(file: File) {
       val data = bufferedReader.readLine
       if (data != 10 && data != null) { // End of line or end of file.
         stringBuffer.append(data)
+        stringBuffer.append(System.lineSeparator())
       } else {
         endOfStream = true
       }
@@ -139,6 +140,7 @@ class InputStream(file: File) {
   //https://www.ibm.com/support/knowledgecenter/ssw_aix_72/generalprogramming/understanding_mem_mapping.html
   //https://howtodoinjava.com/java/nio/memory-mapped-files-mappedbytebuffer/
   //https://www.javacodegeeks.com/2013/05/power-of-java-memorymapped-file.html
+  //this function does not work correctly!!!!!!
   def readFromMappedMemory(bufferSize: Int): StringBuffer = {
     resetStringBuffer
 
@@ -159,7 +161,7 @@ class InputStream(file: File) {
     var data = mappedByteBuffer.get()
 
     var i: Int = 0
-    while (data != -1 && data != 10 && i < size) {
+    while (data != -1 && data != 10 && i < size && mappedByteBuffer.remaining() >= 36) {
       byteArray(i) = data
       data = mappedByteBuffer.get
       currentPosition += 1

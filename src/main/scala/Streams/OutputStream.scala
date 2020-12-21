@@ -54,7 +54,6 @@ class OutputStream(file: File) {
         fileWriter.write(line.charAt(i))
         i += 1
       }
-      fileWriter.write(System.lineSeparator)
       fileWriter.flush
     } catch {
       case _ => throw new Exception("Stream has not been created ...")
@@ -66,7 +65,6 @@ class OutputStream(file: File) {
   def writeLine(line: String): Unit = {
     try {
       bufferedWriter.write(line)
-      bufferedWriter.write(System.lineSeparator)
       bufferedWriter.flush()
     } catch {
       case _ => throw new Exception("Stream has not been created ...")
@@ -92,7 +90,6 @@ class OutputStream(file: File) {
         bufferedWriter.write(line.charAt(i))
         i += 1
       }
-      bufferedWriter.write(System.lineSeparator)
       bufferedWriter.flush()
     } catch {
       case _ => throw new Exception("Stream has not been opened ...")
