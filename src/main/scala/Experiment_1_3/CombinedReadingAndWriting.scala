@@ -25,7 +25,7 @@ class CombinedReadingAndWriting(outputFileAddress: String, inputFilesAddressArra
     inputStreamsList :+ (inputStream, false)
   })
 
-  def readInputFileWriteOutputFile(fileAddress: String, index: Int): Unit = {
+  def readCharacterOfInputFileWriteCharacterInOutputFile(fileAddress: String, index: Int): Unit = {
     val inputStream = new InputStream(new File(fileAddress))
     inputStreamsList(index) = (inputStream, false)
     inputStream.open
@@ -38,7 +38,7 @@ class CombinedReadingAndWriting(outputFileAddress: String, inputFilesAddressArra
   }
 
   def rrmerge: Unit = {
-    inputFilesAddressArrays.zipWithIndex.map { case (fileAddress, index) => Future(readInputFileWriteOutputFile(fileAddress, index))
+    inputFilesAddressArrays.zipWithIndex.map { case (fileAddress, index) => Future(readCharacterOfInputFileWriteCharacterInOutputFile(fileAddress, index))
       .onComplete {
         case Success(res) => {
           val allFilesRead = inputStreamsList.forall(tuple => tuple._2 == true)
