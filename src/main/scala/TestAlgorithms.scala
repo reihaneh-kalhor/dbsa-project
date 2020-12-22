@@ -1,4 +1,4 @@
-import Experiment_1_3.CombinedReadingAndWritingRR
+import Experiment_1_3.CombinedReadingAndWriting
 import Streams.{InputStream, OutputStream}
 
 import java.io.File
@@ -8,9 +8,9 @@ object TestAlgorithms extends App{
   val root = "src/main/resources/"
   val outPutFileAddress = root + "output.txt"
   val inputFilesAddress = Array(root + "IN_1.txt", root + "IN_2.txt" , root + "IN_3.txt")
-//
-  val crawrr = new CombinedReadingAndWritingRR(outPutFileAddress, inputFilesAddress)
-  crawrr.rrmerge
+
+    val combinedReadingAndWriting = new CombinedReadingAndWriting(outPutFileAddress, inputFilesAddress)
+    combinedReadingAndWriting.rrmerge
 
 //  val readerStream = new InputStream(new File(inputFilesAddress(0)))
 //  readerStream.open

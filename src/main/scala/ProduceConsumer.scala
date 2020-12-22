@@ -7,7 +7,7 @@ import scala.concurrent.{Await, Promise}
 import scala.concurrent.duration._
 
 //source https://stackoverflow.com/questions/26293368/what-is-the-correct-way-to-implement-producer-consumer-in-scala
-//example 
+//example
 class Producer(val pool:ActorRef)(val name:String) extends Actor {
 
   def receive = {
