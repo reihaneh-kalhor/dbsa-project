@@ -99,22 +99,42 @@ class OutputStream(file: File) {
   // Implementation 1.1.4
   def writeInMappedMemory(bufferSize: Int, string: String): Unit = {
     try {
+      var size = 0
       var newString = string
       var endIndex = 0
+      var bytesWritten = 0
       if (string.length > bufferSize) {
+        size = bufferSize
         endIndex = bufferSize + currentPosition
         if ((bufferSize + currentPosition) > string.length) endIndex = string.length
         newString = string.substring(currentPosition, endIndex)
         currentPosition = currentPosition + bufferSize
       }
+      else if(string.length <= bufferSize){
+        size = string.length
+      }
 
-      val mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, currentPosition, bufferSize)
+      val mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, currentPosition, size)
+
+//    newString.foreach(str => {
+//      mappedByteBuffer.put(str.asInstanceOf[Byte])
+//      bytesWritten += 1
+//    })
+
+
       val charBuffer: CharBuffer = CharBuffer.wrap(newString)
-      fileChannel.write(Charset.forName("utf-8").encode(charBuffer))
+//      charBuffer.flip()
+      while(charBuffer.hasRemaining){
+        fileChannel.write(Charset.forName("utf-8").encode(charBuffer))
+      }
       mappedByteBuffer.clear
 
-      if (currentPosition >= string.length || bufferSize > string.length)
+
+      if (currentPosition >= string.length || bufferSize > string.length) {
         allFileWritten = true
+//        mappedByteBuffer.force()
+//        fileChannel.truncate(bytesWritten)
+      }
     } catch {
       case _ => throw new Exception("Stream has not been opened ...")
     }
