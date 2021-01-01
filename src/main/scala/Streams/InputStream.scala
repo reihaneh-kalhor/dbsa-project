@@ -156,19 +156,13 @@ class InputStream(file: File) {
 
     val mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, currentPosition, size)
 
-    var byteArray: Array[Byte] = new Array[Byte](size)
-
     var data = mappedByteBuffer.get()
 
-    var i: Int = 0
-    while (data != -1 && data != 10 && i < size && mappedByteBuffer.remaining() >= 36) {
-      byteArray(i) = data
+    while (data != -1 && data != 10 ) {
+      stringBuffer.append(data.asInstanceOf[Char])
       data = mappedByteBuffer.get
       currentPosition += 1
-      i +=1
     }
-    val text = (byteArray.map(_.toChar)).mkString
-    stringBuffer.append(text)
     mappedByteBuffer.clear()
     currentPosition += 1
     stringBuffer

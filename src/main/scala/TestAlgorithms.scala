@@ -12,8 +12,8 @@ object TestAlgorithms extends App{
 //    val combinedReadingAndWriting = new CombinedReadingAndWriting(outPutFileAddress, inputFilesAddress)
 //    combinedReadingAndWriting.rrmerge
 
-//  val readerStream = new InputStream(new File(inputFilesAddress(0)))
-val readerStream = new InputStream(new File(root + "aka.txt"))
+  val readerStream = new InputStream(new File(inputFilesAddress(0)))
+//val readerStream = new InputStream(new File(root + "aka.txt"))
   readerStream.open
   var line : StringBuffer = new StringBuffer()
 //  readerStream.setBufferSize(1024)
@@ -25,8 +25,8 @@ val readerStream = new InputStream(new File(root + "aka.txt"))
   while(!readerStream.endOfStream){
     line = readerStream.readFromMappedMemory(1024)
     System.out.println(line)
-    outputStream.writeInMappedMemory(1024, line.toString)
+    outputStream.writeCharacter(line.toString)
   }
-  outputStream.close
+//  outputStream.close
 
 }

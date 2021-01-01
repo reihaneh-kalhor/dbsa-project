@@ -1,7 +1,7 @@
 package Streams
 
 import java.io.{BufferedWriter, File, FileOutputStream, FileWriter, RandomAccessFile}
-import java.nio.{ByteBuffer, CharBuffer}
+import java.nio.{ByteBuffer, CharBuffer, MappedByteBuffer}
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
 
@@ -12,6 +12,7 @@ class OutputStream(file: File) {
   private var fileWriter: FileWriter = null // Main writer stream.
   private var bufferedWriter: BufferedWriter = null // Used for writing line.
   private var randomAccessFile: RandomAccessFile = null // Used for seeking a position in file.
+  private var mappedByteBuffer: MappedByteBuffer = null
 
   private var fileOutputStream: FileOutputStream = null
   private var fileChannel: FileChannel = null
@@ -114,7 +115,7 @@ class OutputStream(file: File) {
         size = string.length
       }
 
-      val mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, currentPosition, size)
+      mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, currentPosition, size)
 
 //    newString.foreach(str => {
 //      mappedByteBuffer.put(str.asInstanceOf[Byte])
@@ -123,7 +124,6 @@ class OutputStream(file: File) {
 
 
       val charBuffer: CharBuffer = CharBuffer.wrap(newString)
-//      charBuffer.flip()
       while(charBuffer.hasRemaining){
         fileChannel.write(Charset.forName("utf-8").encode(charBuffer))
       }
@@ -132,8 +132,6 @@ class OutputStream(file: File) {
 
       if (currentPosition >= string.length || bufferSize > string.length) {
         allFileWritten = true
-//        mappedByteBuffer.force()
-//        fileChannel.truncate(bytesWritten)
       }
     } catch {
       case _ => throw new Exception("Stream has not been opened ...")
@@ -145,6 +143,8 @@ class OutputStream(file: File) {
     try {
       fileWriter.close
       bufferedWriter.close
+      if(mappedByteBuffer != null) mappedByteBuffer.force
+      fileChannel.truncate(file.length())
     } catch {
       case _ => throw new Exception("Stream has not been created ...")
     }
